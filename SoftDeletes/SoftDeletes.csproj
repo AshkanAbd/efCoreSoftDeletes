@@ -11,6 +11,7 @@
         <Description>A simple implementation for soft deleting entities that you can add it to your project and
             soft delete entities that you want to soft delete and handle related data to soft delete
             or force delete from the database.
+            Documentation: https://github.com/AshkanAbd/efCoreSoftDeletes
         </Description>
         <PackageTags>SoftDelete;efcore;soft delete;ef core soft delete;soft delete ef core;</PackageTags>
         <RepositoryUrl>https://github.com/AshkanAbd/efCoreSoftDeletes</RepositoryUrl>
