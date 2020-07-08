@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageId>SoftDelete</PackageId>
+        <PackageId>EFCore.SoftDelete</PackageId>
         <Version>1.0.0</Version>
         <Authors>AshkanAbd</Authors>
         <Company>AshkanAbd</Company>
