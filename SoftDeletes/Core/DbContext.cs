@@ -12,6 +12,14 @@ namespace SoftDeletes.Core
 {
     public class DbContext : Microsoft.EntityFrameworkCore.DbContext
     {
+        protected DbContext()
+        {
+        }
+
+        public DbContext(DbContextOptions options) : base(options)
+        {
+        }
+
         /// <inheritdoc />
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
