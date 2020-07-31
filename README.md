@@ -28,8 +28,11 @@ You can implement it in your entities. That will add to columns named
 An abstract class that implements `ITimestamps` and `ISoftDelete` interfaces.   
 You can use it in your entities.
 
+### Demo:
+[sample project](https://github.com/AshkanAbd/efCoreSoftDeletesSample) for this implementation.
+
 ### Donation:
-If you like it, you can donate BTC(bitcoin) to this wallet `3MUn52me1PRczXpPQ5PrPZtU8iG1QqeiDY`
+If you like it, you can donate BTC(bitcoin) to this wallet `1LhGtAqbCt5Wra55vmNoiu3Cbzrsnye3pk`
 
 ### Proposal:
 [The proposal](https://1drv.ms/b/s!AirwjkMOI-BwkAzedA6E6YVkZqjQ?e=vfV2hq) for this implementation.
