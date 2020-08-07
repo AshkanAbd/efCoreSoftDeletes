@@ -12,6 +12,7 @@ namespace SoftDeletes.Core
 {
     public class DbContext : Microsoft.EntityFrameworkCore.DbContext
     {
+        protected bool allowRestore = false;
         protected DbContext()
         {
         }
@@ -82,9 +83,8 @@ namespace SoftDeletes.Core
             foreach (var record in updatedRecords) {
                 if (record == null) continue;
                 
-                if(record is ISoftDelete)
+                if(record is ISoftDelete && allowRestore == false)
                 {
-                    //TODO: Check how to remove SoftDelete attribute and how this might affect preventing reverting SoftDelete
                     this.Entry(record).Property("DeletedAt").IsModified = false;
                 }
                 if (record is ITimestamps)
@@ -97,6 +97,8 @@ namespace SoftDeletes.Core
                 }
                 
             }
+
+            allowRestore = false;
         }
 
         /// <summary>
@@ -572,6 +574,116 @@ namespace SoftDeletes.Core
 
                 x.SetForceDelete();
             }
+        }
+
+        /// <summary>
+        ///     Allow restoring entity from soft delete.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         NOTE: This method will restore entities that implements soft deletes by setting DeletedAt to NULL.
+        ///     </para>
+        ///     <para>
+        ///         NOTE: After calling this method SaveChanges will be called.
+        ///     </para>
+        /// </remarks>
+        /// <param name="entity"> The entity to restore. </param>
+        /// <returns>
+        ///     The <see cref="int" /> for the result of SaveChanges.
+        /// </returns>
+        public virtual int Restore([NotNull] ISoftDelete entity)
+        {
+            allowRestore = true;
+
+            entity.DeletedAt = null;
+
+            int result = base.SaveChanges();
+
+            return result;
+        }
+
+        /// <summary>
+        ///     Allow restoring entity from soft delete.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         NOTE: This method will restore entities that implements soft deletes by setting DeletedAt to NULL.
+        ///     </para>
+        ///     <para>
+        ///         NOTE: After calling this method SaveChangesAsync will be called.
+        ///     </para>
+        /// </remarks>
+        /// <param name="entity"> The entity to restore. </param>
+        /// <returns>
+        ///     The <see cref="int" /> for the result of SaveChangesAsync.
+        /// </returns>
+        public virtual async Task<int> RestoreAsync([NotNull] ISoftDelete entity)
+        {
+            allowRestore = true;
+
+            entity.DeletedAt = null;
+
+            var result = await base.SaveChangesAsync();
+
+            return result;
+        }
+
+        /// <summary>
+        ///     Allow restoring range of entities from soft delete.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         NOTE: This method will restore entities that implements soft deletes by setting DeletedAt to NULL.
+        ///     </para>
+        ///     <para>
+        ///         NOTE: After calling this method SaveChanges will be called.
+        ///     </para>
+        /// </remarks>
+        /// <param name="entities"> The entities to restore. </param>
+        /// <returns>
+        ///     The <see cref="int" /> for the result of SaveChanges.
+        /// </returns>
+        public virtual int RestoreRange(IEnumerable<ISoftDelete> entities)
+        {
+            allowRestore = true;
+
+            foreach (var entity in entities)
+            {
+                entity.DeletedAt = null;
+            }
+
+            int result = base.SaveChanges();
+
+            return result;
+        }
+
+        /// <summary>
+        ///     Allow restoring range of entities from soft delete.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         NOTE: This method will restore entities that implements soft deletes by setting DeletedAt to NULL.
+        ///     </para>
+        ///     <para>
+        ///         NOTE: After calling this method SaveChangesAsync will be called.
+        ///     </para>
+        /// </remarks>
+        /// <param name="entities"> The entities to restore. </param>
+        /// <returns>
+        ///     The <see cref="int" /> for the result of SaveChangesAsync.
+        /// </returns>
+        public virtual async Task<int> RestoreRangeAsync(IEnumerable<ISoftDelete> entities)
+        {
+            allowRestore = true;
+
+            foreach (var entity in entities)
+            {
+                entity.DeletedAt = null;
+            }
+
+            int result = await base.SaveChangesAsync();
+
+            return result;
         }
     }
 }
