@@ -31,6 +31,42 @@ namespace SoftDeletes.Core
         }
 
         /// <inheritdoc />
+        public override EntityEntry Entry(object entity)
+        {
+            var result = base.Entry(entity);
+            if (entity is ISoftDelete && result.State == EntityState.Modified && allowRestore == false)
+            {
+                //prevent editing soft deleted records
+                var dbValue = (ISoftDelete)result.GetDatabaseValues().ToObject();
+                if (dbValue.DeletedAt != null)
+                {
+                    throw new DbUpdateConcurrencyException("Can't update soft deleted record.");
+                }
+            }
+
+            allowRestore = false;
+            return result;
+        }
+
+        /// <inheritdoc />
+        public override EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
+        {
+            var result = base.Entry(entity);
+            if (entity is ISoftDelete && result.State == EntityState.Modified && allowRestore == false)
+            {
+                //prevent editing soft deleted records
+                var dbValue = (ISoftDelete)result.GetDatabaseValues().ToObject();
+                if (dbValue.DeletedAt != null)
+                {
+                    throw new DbUpdateConcurrencyException("Can't update soft deleted record.");
+                }
+            }
+
+            allowRestore = false;
+            return result;
+        }
+
+        /// <inheritdoc />
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             SetNewEntitiesTimestamps();
