@@ -13,6 +13,7 @@ namespace SoftDeletes.Core
     public class DbContext : Microsoft.EntityFrameworkCore.DbContext
     {
         protected bool allowRestore = false;
+
         protected DbContext()
         {
         }
@@ -78,24 +79,16 @@ namespace SoftDeletes.Core
         protected virtual void SetModifiedEntitiesTimestamps()
         {
             var updatedRecords = ChangeTracker.Entries()
-                .Where(x => x.State == EntityState.Modified && (x.Entity is ITimestamps || x.Entity is ISoftDelete))
+                .Where(x => x.State == EntityState.Modified && x.Entity is ITimestamps)
                 .Select(x => x.Entity);
             foreach (var record in updatedRecords) {
-                if (record == null) continue;
-                
-                if(record is ISoftDelete && allowRestore == false)
-                {
-                    this.Entry(record).Property("DeletedAt").IsModified = false;
+                if (record is ISoftDelete && allowRestore == false) {
+                    Entry(record).Property("DeletedAt").IsModified = false;
                 }
-                if (record is ITimestamps)
-                {
-                    
-                    this.Entry(record).Property("CreatedAt").IsModified = false;
-                    var r = (ITimestamps)record;
-                    if (r == null) continue;
-                    r.UpdatedAt = DateTime.Now;
-                }
-                
+
+                if (!(record is ITimestamps timestampRecord)) continue;
+                Entry(record).Property("CreatedAt").IsModified = false;
+                timestampRecord.UpdatedAt = DateTime.Now;
             }
 
             allowRestore = false;
@@ -647,8 +640,7 @@ namespace SoftDeletes.Core
         {
             allowRestore = true;
 
-            foreach (var entity in entities)
-            {
+            foreach (var entity in entities) {
                 entity.DeletedAt = null;
             }
 
@@ -676,8 +668,7 @@ namespace SoftDeletes.Core
         {
             allowRestore = true;
 
-            foreach (var entity in entities)
-            {
+            foreach (var entity in entities) {
                 entity.DeletedAt = null;
             }
 
