@@ -22,6 +22,15 @@ namespace SoftDeletes.Core
         }
 
         /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Soft delete filters for all entities implementing ISoftDelete
+            modelBuilder.SetQueryFilterOnAllEntities<ISoftDelete>(u => u.DeletedAt == null);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+        /// <inheritdoc />
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             SetNewEntitiesTimestamps();
