@@ -77,11 +77,25 @@ namespace SoftDeletes.Core
         protected virtual void SetModifiedEntitiesTimestamps()
         {
             var updatedRecords = ChangeTracker.Entries()
-                .Where(x => x.State == EntityState.Modified && x.Entity is ITimestamps)
-                .Select(x => x.Entity as ITimestamps);
+                .Where(x => x.State == EntityState.Modified && (x.Entity is ITimestamps || x.Entity is ISoftDelete))
+                .Select(x => x.Entity);
             foreach (var record in updatedRecords) {
                 if (record == null) continue;
-                record.UpdatedAt = DateTime.Now;
+                
+                if(record is ISoftDelete)
+                {
+                    //TODO: Check how to remove SoftDelete attribute and how this might affect preventing reverting SoftDelete
+                    this.Entry(record).Property("DeletedAt").IsModified = false;
+                }
+                if (record is ITimestamps)
+                {
+                    
+                    this.Entry(record).Property("CreatedAt").IsModified = false;
+                    var r = (ITimestamps)record;
+                    if (r == null) continue;
+                    r.UpdatedAt = DateTime.Now;
+                }
+                
             }
         }
 
