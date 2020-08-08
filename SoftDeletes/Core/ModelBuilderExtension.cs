@@ -1,5 +1,10 @@
 ﻿//CREDIT: https://gist.github.com/haacked/febe9e88354fb2f4a4eb11ba88d64c24
 //And was written by https://gist.github.com/haacked
+
+/*
+Copyright Phil Haack
+Licensed under the MIT license - https://github.com/haacked/CodeHaacks/blob/main/LICENSE.
+*/
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
