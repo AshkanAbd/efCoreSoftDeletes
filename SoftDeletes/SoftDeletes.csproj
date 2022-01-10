@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <PackageId>EFCore.SoftDelete</PackageId>
-        <Version>1.1.1</Version>
+        <Version>1.3.0</Version>
         <Authors>AshkanAbd</Authors>
         <Company>AshkanAbd</Company>
-        <PackageVersion>1.1.1</PackageVersion>
+        <PackageVersion>1.3.0</PackageVersion>
         <Title>Soft delete implementation for EF Core</Title>
         <Description>A simple implementation for soft deleting entities that you can add it to your project and
             soft delete entities that you want to soft delete and handle related data to soft delete
@@ -20,7 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1"/>
     </ItemGroup>
 
 </Project>

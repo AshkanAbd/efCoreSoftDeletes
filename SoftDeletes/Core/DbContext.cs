@@ -12,7 +12,7 @@ namespace SoftDeletes.Core
 {
     public class DbContext : Microsoft.EntityFrameworkCore.DbContext
     {
-        protected bool allowRestore = false;
+        protected bool AllowRestore;
 
         protected DbContext()
         {
@@ -60,8 +60,12 @@ namespace SoftDeletes.Core
             var newRecords = ChangeTracker.Entries()
                 .Where(x => x.State == EntityState.Added && x.Entity is ITimestamps)
                 .Select(x => x.Entity as ITimestamps);
+
             foreach (var record in newRecords) {
-                if (record == null) continue;
+                if (record == null) {
+                    continue;
+                }
+
                 var nowDateTime = DateTime.Now;
                 record.CreatedAt = nowDateTime;
                 record.UpdatedAt = nowDateTime;
@@ -81,17 +85,21 @@ namespace SoftDeletes.Core
             var updatedRecords = ChangeTracker.Entries()
                 .Where(x => x.State == EntityState.Modified && x.Entity is ITimestamps)
                 .Select(x => x.Entity);
+
             foreach (var record in updatedRecords) {
-                if (record is ISoftDelete && allowRestore == false) {
+                if (record is ISoftDelete && AllowRestore == false) {
                     Entry(record).Property("DeletedAt").IsModified = false;
                 }
 
-                if (!(record is ITimestamps timestampRecord)) continue;
+                if (record is not ITimestamps timestampRecord) {
+                    continue;
+                }
+
                 Entry(record).Property("CreatedAt").IsModified = false;
                 timestampRecord.UpdatedAt = DateTime.Now;
             }
 
-            allowRestore = false;
+            AllowRestore = false;
         }
 
         /// <summary>
@@ -107,8 +115,12 @@ namespace SoftDeletes.Core
             var deletedRecords = ChangeTracker.Entries()
                 .Where(x => x.State == EntityState.Deleted && x.Entity is ISoftDelete)
                 .Select(x => x);
+
             foreach (var record in deletedRecords) {
-                if (((ISoftDelete) record.Entity).IsForceDelete()) continue;
+                if (((ISoftDelete) record.Entity).IsForceDelete()) {
+                    continue;
+                }
+
                 record.State = EntityState.Modified;
                 ((ISoftDelete) record.Entity).DeletedAt = DateTime.Now;
             }
@@ -147,9 +159,9 @@ namespace SoftDeletes.Core
         {
             var result = base.Remove(entity);
 
-            if (!(entity is ISoftDelete x)) return result;
-
-            if (x.IsForceDelete()) return result;
+            if (entity is not ISoftDelete x || x.IsForceDelete()) {
+                return result;
+            }
 
             x.LoadRelations(this);
 
@@ -193,9 +205,9 @@ namespace SoftDeletes.Core
         {
             var result = base.Remove(entity);
 
-            if (!(entity is ISoftDelete x)) return result;
-
-            if (x.IsForceDelete()) return result;
+            if (entity is not ISoftDelete x || x.IsForceDelete()) {
+                return result;
+            }
 
             await x.LoadRelationsAsync(this, cancellationToken);
 
@@ -236,7 +248,9 @@ namespace SoftDeletes.Core
         {
             var result = base.Remove(entity);
 
-            if (!(entity is ISoftDelete x)) return result;
+            if (entity is not ISoftDelete x) {
+                return result;
+            }
 
             x.SetForceDelete();
 
@@ -276,9 +290,9 @@ namespace SoftDeletes.Core
         {
             var result = base.Remove(entity);
 
-            if (!(entity is ISoftDelete x)) return result;
-
-            if (x.IsForceDelete()) return result;
+            if (entity is not ISoftDelete x || x.IsForceDelete()) {
+                return result;
+            }
 
             x.LoadRelations(this);
 
@@ -322,9 +336,9 @@ namespace SoftDeletes.Core
         {
             var result = base.Remove(entity);
 
-            if (!(entity is ISoftDelete x)) return result;
-
-            if (x.IsForceDelete()) return result;
+            if (entity is not ISoftDelete x || x.IsForceDelete()) {
+                return result;
+            }
 
             await x.LoadRelationsAsync(this, cancellationToken);
 
@@ -364,7 +378,9 @@ namespace SoftDeletes.Core
         {
             var result = base.Remove(entity);
 
-            if (!(entity is ISoftDelete x)) return result;
+            if (entity is not ISoftDelete x) {
+                return result;
+            }
 
             x.SetForceDelete();
 
@@ -398,9 +414,9 @@ namespace SoftDeletes.Core
             base.RemoveRange(entities);
 
             foreach (var entity in entities) {
-                if (!(entity is ISoftDelete x)) continue;
-
-                if (x.IsForceDelete()) continue;
+                if (entity is not ISoftDelete x || x.IsForceDelete()) {
+                    continue;
+                }
 
                 x.LoadRelations(this);
 
@@ -489,9 +505,9 @@ namespace SoftDeletes.Core
             base.RemoveRange(entities);
 
             foreach (var entity in entities) {
-                if (!(entity is ISoftDelete x)) continue;
-
-                if (x.IsForceDelete()) continue;
+                if (entity is not ISoftDelete x || x.IsForceDelete()) {
+                    continue;
+                }
 
                 x.LoadRelations(this);
 
@@ -527,9 +543,9 @@ namespace SoftDeletes.Core
             base.RemoveRange(entities);
 
             foreach (var entity in entities) {
-                if (!(entity is ISoftDelete x)) continue;
-
-                if (x.IsForceDelete()) continue;
+                if (entity is not ISoftDelete x || x.IsForceDelete()) {
+                    continue;
+                }
 
                 await x.LoadRelationsAsync(this, cancellationToken);
 
@@ -563,7 +579,9 @@ namespace SoftDeletes.Core
             base.RemoveRange(entities);
 
             foreach (var entity in entities) {
-                if (!(entity is ISoftDelete x)) continue;
+                if (entity is not ISoftDelete x) {
+                    continue;
+                }
 
                 x.SetForceDelete();
             }
@@ -584,41 +602,11 @@ namespace SoftDeletes.Core
         /// <returns>
         ///     The <see cref="int" /> for the result of SaveChanges.
         /// </returns>
-        public virtual int Restore([NotNull] ISoftDelete entity)
+        public virtual void Restore([NotNull] ISoftDelete entity)
         {
-            allowRestore = true;
+            AllowRestore = true;
 
             entity.DeletedAt = null;
-
-            int result = base.SaveChanges();
-
-            return result;
-        }
-
-        /// <summary>
-        ///     Allow restoring entity from soft delete.
-        /// </summary>
-        /// <remarks>
-        ///     <para>
-        ///         NOTE: This method will restore entities that implements soft deletes by setting DeletedAt to NULL.
-        ///     </para>
-        ///     <para>
-        ///         NOTE: After calling this method SaveChangesAsync will be called.
-        ///     </para>
-        /// </remarks>
-        /// <param name="entity"> The entity to restore. </param>
-        /// <returns>
-        ///     The <see cref="int" /> for the result of SaveChangesAsync.
-        /// </returns>
-        public virtual async Task<int> RestoreAsync([NotNull] ISoftDelete entity)
-        {
-            allowRestore = true;
-
-            entity.DeletedAt = null;
-
-            var result = await base.SaveChangesAsync();
-
-            return result;
         }
 
         /// <summary>
@@ -636,45 +624,13 @@ namespace SoftDeletes.Core
         /// <returns>
         ///     The <see cref="int" /> for the result of SaveChanges.
         /// </returns>
-        public virtual int RestoreRange(IEnumerable<ISoftDelete> entities)
+        public virtual void RestoreRange(IEnumerable<ISoftDelete> entities)
         {
-            allowRestore = true;
+            AllowRestore = true;
 
             foreach (var entity in entities) {
                 entity.DeletedAt = null;
             }
-
-            int result = base.SaveChanges();
-
-            return result;
-        }
-
-        /// <summary>
-        ///     Allow restoring range of entities from soft delete.
-        /// </summary>
-        /// <remarks>
-        ///     <para>
-        ///         NOTE: This method will restore entities that implements soft deletes by setting DeletedAt to NULL.
-        ///     </para>
-        ///     <para>
-        ///         NOTE: After calling this method SaveChangesAsync will be called.
-        ///     </para>
-        /// </remarks>
-        /// <param name="entities"> The entities to restore. </param>
-        /// <returns>
-        ///     The <see cref="int" /> for the result of SaveChangesAsync.
-        /// </returns>
-        public virtual async Task<int> RestoreRangeAsync(IEnumerable<ISoftDelete> entities)
-        {
-            allowRestore = true;
-
-            foreach (var entity in entities) {
-                entity.DeletedAt = null;
-            }
-
-            int result = await base.SaveChangesAsync();
-
-            return result;
         }
     }
 }
