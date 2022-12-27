@@ -57,7 +57,7 @@ You can use it in your entities.
 
 ### Demo:
 
-[Sample project](https://github.com/AshkanAbd/efCoreSoftDeletes/Sample) for this implementation.
+[Sample project](https://github.com/AshkanAbd/efCoreSoftDeletes/tree/master/Sample) for this implementation.
 
 ### Donation:
 
